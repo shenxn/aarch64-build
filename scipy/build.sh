@@ -11,7 +11,7 @@ DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
 
 # Download source code
 VERSION=`cat VERSION`
-URL=https://github.com/scipy/scipy/releases/download/v${VERSUIB}/scipy-${VERSION}.tar.gz
+URL=https://github.com/scipy/scipy/releases/download/v${VERSION}/scipy-${VERSION}.tar.gz
 curl -L $URL -o scipy.tar.gz
 tar -zxvf scipy.tar.gz
 mv scipy-* scipy
