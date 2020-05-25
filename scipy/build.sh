@@ -6,7 +6,7 @@ set -ex
 apt-get update
 DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     build-essential gfortran \
-    curl ca-certificate \
+    curl ca-certificates \
     libopenblas-dev python3-dev python3-numpy python3-setuptools python3-wheel
 
 # Download source code
