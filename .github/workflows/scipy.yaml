@@ -1,0 +1,41 @@
+name: Build SciPy
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'scipy/*'
+
+jobs:
+  build_scipy:
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+      - name: Build
+        run: docker run --rm --mount type=bind,src=scipy,dst=/build -t multiarch/ubuntu-core:arm64-bionic /build/build.sh
+      - name: Set Env
+        run: |
+          VERSION=`cat scipy/VERSION`
+          echo "::set-env name=VERSION::${VERSION}"
+      - name: Create Release
+        id: create-release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: scipy-${{ env.RELEASE }}
+          release_name: SciPy ${{ env.RELEASE }}
+          body: SciPy aarch64 build.
+          draft: false
+          prerelease: false
+      - name: Upload Release Asset
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          asset_path: ./scipy/scipy-${{ env.RELEASE }}-cp36-cp36m-linux_aarch64.whl
+          asset_name: scipy-${{ env.RELEASE }}-cp36-cp36m-linux_aarch64.whl
+          asset_content_type: application/zip
