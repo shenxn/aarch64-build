@@ -6,14 +6,23 @@ on:
       - master
     paths:
       - 'scipy/*'
+      - '.github/workflows/scipy.yaml'
 
 jobs:
   build_scipy:
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@master
       - name: Build
-        run: docker run --rm --mount type=bind,src=scipy,dst=/build -t multiarch/ubuntu-core:arm64-bionic /build/build.sh
+        uses: uraimo/run-on-arch-action@v1.0.9
+        with:
+          architecture: aarch64
+          distribution: ubuntu18.04
+          run: |
+            uname -a
+            cd scipy
+            bash build.sh
       - name: Set Env
         run: |
           VERSION=`cat scipy/VERSION`
@@ -24,8 +33,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: scipy-${{ env.RELEASE }}
-          release_name: SciPy ${{ env.RELEASE }}
+          tag_name: scipy-${{ env.VERSION }}
+          release_name: SciPy ${{ env.VERSION }}
           body: SciPy aarch64 build.
           draft: false
           prerelease: false
@@ -36,6 +45,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create-release.outputs.upload_url }}
-          asset_path: ./scipy/scipy-${{ env.RELEASE }}-cp36-cp36m-linux_aarch64.whl
-          asset_name: scipy-${{ env.RELEASE }}-cp36-cp36m-linux_aarch64.whl
+          asset_path: ./scipy/scipy-${{ env.VERSION }}-cp36-cp36m-linux_aarch64.whl
+          asset_name: scipy-${{ env.VERSION }}-cp36-cp36m-linux_aarch64.whl
           asset_content_type: application/zip

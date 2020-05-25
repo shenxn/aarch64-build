@@ -4,7 +4,7 @@ set -ex
 
 # Test
 VERSION=`cat VERSION`
-cat "test" > scipy-${RELEASE}-cp36-cp36m-linux_aarch64.whl
+uname -a > scipy-${RELEASE}-cp36-cp36m-linux_aarch64.whl
 
 # # Install dependencies
 # apt-get update
