@@ -1,0 +1,49 @@
+name: Build
+
+on:
+  repository_dispatch:
+    types: build
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+      - name: Set Env
+        run: |
+          echo "::set-env name=NAME::${{ github.event.client_payload.name }}"
+          echo "::set-env name=DISPLAY_NAME::${{ github.event.client_payload.display_name }}"
+      - name: Set Version
+        run: |
+          VERSION=`cat ${{ env.NAME }}/VERSION`
+          echo "::set-env name=VERSION::${VERSION}"
+      - name: Build
+        uses: uraimo/run-on-arch-action@v1.0.9
+        with:
+          architecture: aarch64
+          distribution: ubuntu18.04
+          run: |
+            cd ${{ env.NAME }}
+            bash build.sh
+      - name: Create Release
+        id: create-release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.NAME }}-${{ env.VERSION }}
+          release_name: ${{ env.DISPLAY_NAME }} ${{ env.VERSION }}
+          body: ${{ env.DISPLAY_NAME }} aarch64 build.
+          draft: false
+          prerelease: false
+      - name: Upload Release Asset
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-release.outputs.upload_url }}
+          asset_path: ./${{ env.NAME }}/${{ env.NAME }}-${{ env.VERSION }}-cp36-cp36m-linux_aarch64.whl
+          asset_name: ${{ env.NAME }}-${{ env.VERSION }}-cp36-cp36m-linux_aarch64.whl
+          asset_content_type: application/zip

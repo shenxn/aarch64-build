@@ -1,0 +1,25 @@
+name: Build NumPy
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - numpy/build.sh
+      - numpy/VERSION
+      - trigger.sh
+      - .github/workflows/numpy.yaml
+      - .github/workflows/build.yaml
+  
+jobs:
+  build_numpy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+      - name: Trigger build
+        run: bash trigger.sh
+        env:
+          PERSONAL_TOKEN: ${{ secrets.PERSONAL_TOKEN }}
+          NAME: numpy
+          DISPLAY_NAME: NumPy
